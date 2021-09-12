@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package searchMovies;
+
+option go_package = "./;searchMovies";
+
+message Movie {
+  string title = 1;
+  string year = 2;
+  string imdbID = 3;
+  string type = 4;
+  string poster = 5;
+}
+
+message SearchRequest {
+  // Page index parameter for search movies result
+  int64 pagination = 1;
+
+  // Search word parameter for search movies
+  string searchWord = 2;
+}
+
+message SearchResponse {
+  repeated Movie movies = 1;
+  string err = 2;
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  int64 code = 1;
+  string err = 2;
+}
+
+service SearchMovies {
+  rpc Search(SearchRequest) returns (SearchResponse);
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
