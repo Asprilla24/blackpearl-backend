@@ -68,14 +68,14 @@ func main() {
 	var g group.Group
 	{
 		// The HTTP listener mounts the Go kit HTTP handler we created.
-		httpAddr := fmt.Sprintf("localhost:%s", conf.HTTPPort)
+		httpAddr := fmt.Sprintf("0.0.0.0:%s", conf.HTTPPort)
 		httpListener, err := net.Listen("tcp", httpAddr)
 		if err != nil {
 			logger.Log("HTTP", "during", "Listen", "err", err)
 			os.Exit(1)
 		}
 		g.Add(func() error {
-			logger.Log("HTTP", "addr", httpAddr)
+			logger.Log("Listen", "HTTP", "addr", httpAddr)
 			return http.Serve(httpListener, httpHandler)
 		}, func(error) {
 			httpListener.Close()
@@ -83,14 +83,14 @@ func main() {
 	}
 	{
 		// The gRPC listener mounts the Go kit gRPC server
-		grpcAddr := fmt.Sprintf("localhost:%s", conf.GRPCPort)
+		grpcAddr := fmt.Sprintf("0.0.0.0:%s", conf.GRPCPort)
 		grpcListener, err := net.Listen("tcp", grpcAddr)
 		if err != nil {
 			logger.Log("gRPC", "during", "Listen", "err", err)
 			os.Exit(1)
 		}
 		g.Add(func() error {
-			logger.Log("gRPC", "addr", grpcAddr)
+			logger.Log("Listen", "gRPC", "addr", grpcAddr)
 			baseServer := grpc.NewServer(grpc.UnaryInterceptor(kitgrpc.Interceptor))
 			pb.RegisterSearchMoviesServer(baseServer, grpcServer)
 			return baseServer.Serve(grpcListener)

@@ -2,6 +2,7 @@ package transports
 
 import (
 	"context"
+	"errors"
 
 	"search-movies/api/v1/searchMovies"
 	"search-movies/pkg/endpoints"
@@ -33,6 +34,7 @@ func NewGRPCServer(ep endpoints.Set) searchMovies.SearchMoviesServer {
 func (g *grpcServer) Search(ctx context.Context, r *searchMovies.SearchRequest) (*searchMovies.SearchResponse, error) {
 	_, rep, err := g.search.ServeGRPC(ctx, r)
 	if err != nil {
+		logger.Log("Search error", err.Error())
 		return nil, err
 	}
 	return rep.(*searchMovies.SearchResponse), nil
@@ -41,13 +43,18 @@ func (g *grpcServer) Search(ctx context.Context, r *searchMovies.SearchRequest) 
 func (g *grpcServer) HealthCheck(ctx context.Context, r *searchMovies.HealthCheckRequest) (*searchMovies.HealthCheckResponse, error) {
 	_, rep, err := g.heathCheck.ServeGRPC(ctx, r)
 	if err != nil {
+		logger.Log("HealthCheck error", err.Error())
 		return nil, err
 	}
 	return rep.(*searchMovies.HealthCheckResponse), nil
 }
 
 func decodeGRPCSearchRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
-	req := grpcReq.(*searchMovies.SearchRequest)
+	req, ok := grpcReq.(*searchMovies.SearchRequest)
+	if !ok {
+		logger.Log("decodeGRPCSearchRequest", "decode request error")
+		return nil, errors.New("searchMovies decode request error")
+	}
 
 	return model.SearchRequest{Pagination: req.Pagination, SearchWord: req.SearchWord}, nil
 }
@@ -57,7 +64,12 @@ func decodeGRPCHealthCheckRequest(_ context.Context, grpcReq interface{}) (inter
 }
 
 func decodeGRPCSearchResponse(_ context.Context, grpcResp interface{}) (interface{}, error) {
-	resp := grpcResp.(model.SearchResponse)
+	resp, ok := grpcResp.(model.SearchResponse)
+	if !ok {
+		logger.Log("decodeGRPCSearchResponse", "decode response error")
+		return nil, errors.New("searchMovies decode response error")
+	}
+
 	var movies []*searchMovies.Movie
 	for _, val := range resp.Movies {
 		movie := searchMovies.Movie{
@@ -74,6 +86,10 @@ func decodeGRPCSearchResponse(_ context.Context, grpcResp interface{}) (interfac
 }
 
 func decodeGRPCHealthCheckResponse(_ context.Context, grpcResp interface{}) (interface{}, error) {
-	resp := grpcResp.(model.HealthCheckResponse)
+	resp, ok := grpcResp.(model.HealthCheckResponse)
+	if !ok {
+		logger.Log("decodeGRPCHealthCheckResponse", "decode response error")
+		return nil, errors.New("healthcheck decode response error")
+	}
 	return &searchMovies.HealthCheckResponse{Code: resp.Code, Err: resp.Err}, nil
 }

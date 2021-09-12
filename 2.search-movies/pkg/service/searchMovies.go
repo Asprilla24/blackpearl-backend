@@ -27,6 +27,7 @@ func NewService(db dao.DB, config config.Config) Service {
 func (service *searchMoviesService) Search(_ context.Context, pagination int64, searchWord string) ([]model.Movie, error) {
 	result, err := service.searchMovies(pagination, searchWord)
 	if err != nil {
+		logger.Log("Search error", err.Error())
 		return nil, err
 	}
 
@@ -35,6 +36,7 @@ func (service *searchMoviesService) Search(_ context.Context, pagination int64, 
 
 func (service *searchMoviesService) HealthCheck(_ context.Context) (int64, error) {
 	if err := service.DB.Health(); err != nil {
+		logger.Log("HealthCheck error", err.Error())
 		return http.StatusInternalServerError, err
 	}
 	return http.StatusOK, nil
@@ -45,17 +47,19 @@ func (service *searchMoviesService) searchMovies(pagination int64, searchWord st
 
 	newReq, err := http.NewRequest(http.MethodGet, getSearchMoviesURL, nil)
 	if err != nil {
+		logger.Log("searchMovies, NewRequest error", err.Error())
 		return nil, err
 	}
 
 	body, status, err := util.DoHTTPRequest(newReq)
 	if err != nil {
+		logger.Log("searchMovies, DoHTTPRequest error", err.Error())
 		return nil, err
 	}
 
 	err = service.createLog(getSearchMoviesURL, status)
 	if err != nil {
-		logger.Log("createLog", err.Error())
+		logger.Log("searchMovies, createLog error", err.Error())
 	}
 
 	if status != http.StatusOK {
@@ -65,6 +69,7 @@ func (service *searchMoviesService) searchMovies(pagination int64, searchWord st
 	var respBody model.SearchIMDBResponse
 	err = json.Unmarshal(body, &respBody)
 	if err != nil {
+		logger.Log("searchMovies, Unmarshal error", err.Error())
 		return nil, err
 	}
 
@@ -72,11 +77,11 @@ func (service *searchMoviesService) searchMovies(pagination int64, searchWord st
 }
 
 func (service *searchMoviesService) createLog(url string, respStatus int) error {
-	log := model.Log{
+	accessLog := model.Log{
 		URL:            url,
 		ResponseStatus: respStatus,
 	}
-	return service.DB.InsertLog(log)
+	return service.DB.InsertLog(accessLog)
 }
 
 var logger log.Logger

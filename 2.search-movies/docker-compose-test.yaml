@@ -1,13 +1,14 @@
 version: "3"
 services:
-  search-movies:
-    image: "search-movies:latest"
+  test:
+    image: "golang:1.16"
     volumes:
       - .:/search-movies
-    ports:
-      - 8085:8085
-      - 9080:9080
-    environment: 
+    working_dir: /search-movies
+    command: /bin/true
+    depends_on:
+      - postgres
+    environment:
       SERVER_HTTP_PORT: 8085
       SERVER_GRPC_PORT: 9080
       OMDB_KEY: faf7e5bb

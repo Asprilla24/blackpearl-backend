@@ -33,21 +33,19 @@ func NewHTTPHandler(ep endpoints.Set) http.Handler {
 
 func decodeHTTPSearchRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var req model.SearchRequest
-	if r.ContentLength == 0 {
-		logger.Log("Search request with no body")
-		return req, nil
-	}
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
+		logger.Log("decodeHTTPSearchRequest", err.Error())
 		return nil, err
 	}
 	return req, nil
 }
 
-func decodeHTTPHealthCheckRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+func decodeHTTPHealthCheckRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var req model.HealthCheckRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
+		logger.Log("decodeHTTPHealthCheckRequest", err.Error())
 		return nil, err
 	}
 	return req, nil

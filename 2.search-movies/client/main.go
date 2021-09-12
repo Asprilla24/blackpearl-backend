@@ -15,13 +15,24 @@ var (
 	serverAddr = flag.String("server_addr", "127.0.0.1:9080", "The server address in the format of host:port")
 )
 
-func runExecute(client searchMovies.SearchMoviesClient) {
+func runSearchMovies(client searchMovies.SearchMoviesClient) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	stream, err := client.Search(ctx, &searchMovies.SearchRequest{Pagination: 2, SearchWord: "batman"})
 	if err != nil {
 		fmt.Printf("%v.Search(ctx) = %v, %v: ", client, stream, err)
+	}
+	fmt.Println(stream)
+}
+
+func runHealthCheck(client searchMovies.SearchMoviesClient) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	stream, err := client.HealthCheck(ctx, &searchMovies.HealthCheckRequest{})
+	if err != nil {
+		fmt.Printf("%v.HealthCheck(ctx) = %v, %v: ", client, stream, err)
 	}
 	fmt.Println(stream)
 }
@@ -37,5 +48,6 @@ func main() {
 	defer conn.Close()
 	client := searchMovies.NewSearchMoviesClient(conn)
 
-	runExecute(client)
+	runSearchMovies(client)
+	runHealthCheck(client)
 }
