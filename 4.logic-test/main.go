@@ -43,5 +43,8 @@ func prettyPrint(v interface{}) (err error) {
 
 func main() {
 	input := []string{"kita", "atik", "tika", "aku", "kia", "makan", "kua"}
-	prettyPrint(anagramsGroup(input))
+	err := prettyPrint(anagramsGroup(input))
+	if err != nil {
+		fmt.Println(err)
+	}
 }
