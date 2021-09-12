@@ -1,0 +1,25 @@
+version: "3"
+services:
+  search-movies:
+    image: "search-movies:latest"
+    volumes:
+      - .:/search-movies
+    ports:
+      - 127.0.0.1:8085:8085
+      - 127.0.0.1:9080:9080
+    environment: 
+      SERVER_HTTP_PORT: 8085
+      SERVER_GRPC_PORT: 9080
+      OMDB_KEY: faf7e5bb
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: go
+      DB_USERNAME: go
+      DB_PASSWORD: mypassword
+      DB_SSL_ENABLED: "false"
+  postgres:
+    image: "postgres"
+    environment:
+      - POSTGRES_USER=go
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=go
